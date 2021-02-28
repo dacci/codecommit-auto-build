@@ -1,4 +1,4 @@
-import { App, RemovalPolicy, Stack } from '@aws-cdk/core';
+import { App, Duration, RemovalPolicy, Stack } from '@aws-cdk/core';
 import { NodejsFunction } from '@aws-cdk/aws-lambda-nodejs';
 import { Runtime } from '@aws-cdk/aws-lambda';
 import { LogGroup, RetentionDays } from '@aws-cdk/aws-logs';
@@ -17,9 +17,15 @@ const handler = new NodejsFunction(stack, 'Handler', {
     minify: true,
     sourceMap: true,
   },
+  timeout: Duration.minutes(1),
   environment: {
     NODE_OPTIONS: '--enable-source-maps',
   },
+});
+
+handler.configureAsyncInvoke({
+  maxEventAge: Duration.minutes(1),
+  retryAttempts: 0,
 });
 
 handler.addToRolePolicy(new PolicyStatement({
